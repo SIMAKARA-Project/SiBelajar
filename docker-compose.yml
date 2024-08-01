@@ -10,6 +10,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/${PG_DB}
       - SPRING_DATASOURCE_USERNAME=${PG_UNAME}
       - SPRING_DATASOURCE_PASSWORD=${PG_PASSW}
+      - JWT_SECRET_KEY=${JWT_SECRET}
 
   database:
     image: postgres:16-alpine

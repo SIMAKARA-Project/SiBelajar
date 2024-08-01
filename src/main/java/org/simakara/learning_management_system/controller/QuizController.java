@@ -144,12 +144,12 @@ public class QuizController {
     }
 
     @PostMapping(
-            path = "/update/{code}",
+            path = "/update/{courseCode}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<WebResponse<QuizResponse>> updateQuizCourse(
             @RequestBody UpdateQuizCourseRequest request,
-            @PathVariable(value = "code") String courseCode
+            @PathVariable(value = "courseCode") String courseCode
     ) {
         QuizResponse response = quizService.updateQuizCourse(request, courseCode);
 
