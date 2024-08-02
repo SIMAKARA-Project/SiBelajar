@@ -1,4 +1,4 @@
-package org.simakara.learning_management_system.config;
+package org.simakara.learning_management_system.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @RequiredArgsConstructor
-public class GeneralConfig {
+public class SecurityBeans {
 
     private final UserDetailsService userDetailsService;
 

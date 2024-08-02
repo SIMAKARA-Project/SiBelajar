@@ -1,122 +1,135 @@
 package org.simakara.learning_management_system.service;
 
 import lombok.RequiredArgsConstructor;
-import org.simakara.learning_management_system.dto.request.LoginRequest;
-import org.simakara.learning_management_system.dto.request.RegisterRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.simakara.learning_management_system.dto.request.UpdateUserRequest;
 import org.simakara.learning_management_system.dto.response.UserResponse;
 import org.simakara.learning_management_system.handler.ValidatorHandler;
-import org.simakara.learning_management_system.model.Role;
 import org.simakara.learning_management_system.model.User;
-import org.simakara.learning_management_system.repository.RoleRepository;
 import org.simakara.learning_management_system.repository.UserRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.Objects;
 
 import static org.simakara.learning_management_system.mapper.UserResponseMapper.toUserResponse;
-import static org.simakara.learning_management_system.tools.NameFormater.format;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceIMPL implements UserService{
 
     private final UserRepository userRepo;
-
-    private final RoleRepository roleRepo;
 
     private final ValidatorHandler validatorHandler;
 
     private final PasswordEncoder passwordEncoder;
 
-    private final AuthenticationManager authManager;
-
-    private final JwtService jwtService;
-
     @Override
-    public UserResponse register(RegisterRequest request) {
-        validatorHandler.validate(request);
+    public UserResponse getUser(String username) {
+        log.info("Getting user info from {}", username);
 
-        if (
-                userRepo.existsByUsername(request.username()) &&
-                        userRepo.existsByEmail(request.email())
-        ) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Username and email is already used"
-            );
-        } else if (userRepo.existsByUsername(request.username())) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Username is already used"
-            );
-        } else if (userRepo.existsByEmail(request.email())) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Email is already used"
-            );
-        }
-
-        Role role = roleRepo
-                .findByName("USER")
+        User user = userRepo.findByUsername(username)
                 .orElseThrow(
                         () -> new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
-                                "Role does not exist"
+                                "User not found"
                         )
                 );
 
-        User registeredUser = User
-                .builder()
-                .firstname(format(request.firstname()))
-                .lastname(format(request.lastname()))
-                .username(request.username().toLowerCase())
-                .email(request.email())
-                .roles(Set.of(role))
-                .password(passwordEncoder.encode(request.password()))
-                .build();
-
-        userRepo.save(registeredUser);
-
-        return toUserResponse(registeredUser);
-    }
-
-    @Override
-    public UserResponse login(LoginRequest request) {
-
-        validatorHandler.validate(request);
-
-        var auth = authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.username().toLowerCase(),
-                        request.password()
-                )
-        );
-
-        User user = (User) auth.getPrincipal();
+        log.info("Responding...");
 
         return toUserResponse(user);
     }
 
     @Override
-    public String createToken(String username) {
+    @Transactional
+    public UserResponse updateUser(UpdateUserRequest request, String currentUsername) {
+        log.info("Validating request...");
 
-        User user = userRepo.findByUsername(username.toLowerCase())
+        validatorHandler.validate(request);
+
+        log.info("Request validated. Processing request...");
+
+        User user = userRepo.findByUsername(currentUsername)
                 .orElseThrow(
-                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+                        () -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "User not found"
+                        )
                 );
 
-        var claims = new HashMap<String, Object>();
+        log.info("validating authentication...");
 
-        claims.put("fullName", user.fullName());
+        validatorHandler.validateAuth(user);
 
-        return jwtService.generateToken(claims, user);
+        log.info("Validated. Processing extra password matching layer...");
+
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong password");
+        }
+
+        log.info("Password matched. Editing {} fields", currentUsername);
+
+        String firstname = request.firstname();
+        String lastname = request.lastname();
+        String email = request.email();
+        LocalDate dateOfBirth = request.dateOfBirth();
+
+        if (Objects.nonNull(firstname) && !firstname.isBlank()) {
+            log.info("Setting new first name...");
+
+            user.setFirstname(firstname);
+        }
+
+        if (Objects.nonNull(lastname) && !lastname.isBlank()) {
+            log.info("Setting new last name...");
+
+            user.setLastname(lastname);
+        }
+
+        if (Objects.nonNull(email) && !email.isBlank()) {
+            log.info("Setting new email...");
+
+            user.setEmail(email);
+        }
+
+        if (Objects.nonNull(dateOfBirth)) {
+            log.info("Setting new date of birth...");
+
+            user.setDateOfBirth(dateOfBirth);
+        }
+
+        log.info("Saving changes...");
+
+        userRepo.save(user);
+
+        log.info("Saved successfully");
+
+        return toUserResponse(user);
     }
 
+    @Override
+    @Transactional
+    public void deleteUser(String username) {
+        log.info("Finding user with username: {}...", username);
 
+        User user = userRepo.findByUsername(username)
+                .orElseThrow(
+                        () -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "User not found"
+                        )
+                );
+
+        log.info("User found. Deleting user...");
+
+        userRepo.delete(user);
+
+        log.info("User deleted successfully");
+    }
 }

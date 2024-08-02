@@ -1,14 +1,13 @@
 package org.simakara.learning_management_system.service;
 
-import org.simakara.learning_management_system.dto.request.LoginRequest;
-import org.simakara.learning_management_system.dto.request.RegisterRequest;
+import org.simakara.learning_management_system.dto.request.UpdateUserRequest;
 import org.simakara.learning_management_system.dto.response.UserResponse;
 
 public interface UserService {
 
-    UserResponse register(RegisterRequest request);
+    UserResponse getUser(String username);
 
-    UserResponse login(LoginRequest request);
+    UserResponse updateUser(UpdateUserRequest request, String currentUsername);
 
-    String createToken(String username);
+    void deleteUser(String username);
 }

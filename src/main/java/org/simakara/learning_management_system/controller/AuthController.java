@@ -5,7 +5,7 @@ import org.simakara.learning_management_system.dto.request.LoginRequest;
 import org.simakara.learning_management_system.dto.request.RegisterRequest;
 import org.simakara.learning_management_system.dto.response.UserResponse;
 import org.simakara.learning_management_system.dto.response.WebResponse;
-import org.simakara.learning_management_system.service.UserService;
+import org.simakara.learning_management_system.service.AuthService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final UserService userService;
+    private final AuthService authService;
 
     @PostMapping(
             path = "/register",
@@ -33,7 +33,7 @@ public class AuthController {
             @RequestBody RegisterRequest request
     ) {
 
-        UserResponse response = userService.register(request);
+        UserResponse response = authService.register(request);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -55,9 +55,9 @@ public class AuthController {
     public ResponseEntity<WebResponse<UserResponse>> login(
             @RequestBody LoginRequest request
     ) {
-        UserResponse response = userService.login(request);
+        UserResponse response = authService.login(request);
 
-        String token = userService.createToken(request.username());
+        String token = authService.createToken(request.username());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
