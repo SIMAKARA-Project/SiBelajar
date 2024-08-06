@@ -73,7 +73,9 @@ public class UserController {
             path = "/delete/{username}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<WebResponse<String>> deleteUser(String username) {
+    public ResponseEntity<WebResponse<String>> deleteUser(
+            @PathVariable(value = "username") String username
+    ) {
         userService.deleteUser(username);
 
         return ResponseEntity
