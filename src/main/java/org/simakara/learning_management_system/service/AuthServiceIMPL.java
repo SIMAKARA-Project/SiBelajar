@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import static org.simakara.learning_management_system.mapper.UserResponseMapper.toUserResponse;
@@ -79,7 +80,7 @@ public class AuthServiceIMPL implements AuthService {
                 .lastname(format(request.lastname()))
                 .username(request.username().toLowerCase())
                 .email(request.email())
-                .roles(Set.of(role))
+                .roles(List.of(role))
                 .password(passwordEncoder.encode(request.password()))
                 .build();
 

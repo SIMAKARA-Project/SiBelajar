@@ -31,7 +31,8 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers("/v2/api-docs",
+                        req
+                                .requestMatchers("/v2/api-docs",
                                         "/v3/api-docs",
                                         "/v3/api-docs/**",
                                         "/swagger-resources",
@@ -41,7 +42,8 @@ public class SecurityConfig {
                                         "/swagger-ui/**",
                                         "/webjars/**",
                                         "/swagger-ui.html",
-                                        "/api/v2/auth/login")
+                                        "/api/v2/auth/login"
+                                )
                                 .permitAll()
                                 .requestMatchers(
                                         HttpMethod.POST,
@@ -52,7 +54,8 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         HttpMethod.DELETE,
                                         "/api/v2/course/delete/{code}",
-                                        "/api/v2/quiz/delete/{code}"
+                                        "/api/v2/quiz/delete/{code}",
+                                        "/api/v2/user/delete/**"
                                 )
                                 .hasAuthority("SUPER_ADMIN")
                                 .requestMatchers(
@@ -65,7 +68,9 @@ public class SecurityConfig {
                                         HttpMethod.POST,
                                         "/api/v2/quiz/update/{courseCode}",
                                         "/api/v2/quiz/remove/{courseCode}/{quizCode}",
-                                        "/api/v2/user/register"
+                                        "/api/v2/auth/register",
+                                        "/api/v2/course/enroll",
+                                        "/api/v2/course/enroll/remove"
                                 )
                                 .hasAnyAuthority("SUPER_ADMIN", "ADMIN")
                                 .requestMatchers(
@@ -74,7 +79,18 @@ public class SecurityConfig {
                                         "/api/v2/course/search",
                                         "/api/v2/quiz/{code}",
                                         "/api/v2/quiz/search",
-                                        "/api/v2/quiz/course/{courseCode}"
+                                        "/api/v2/quiz/course/{courseCode}",
+                                        "/api/v2/user/**"
+                                )
+                                .permitAll()
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/api/v2/auth/login"
+                                )
+                                .permitAll()
+                                .requestMatchers(
+                                        HttpMethod.PATCH,
+                                        "/api/v2/user/update/**"
                                 )
                                 .permitAll()
                                 .anyRequest()

@@ -2,8 +2,10 @@ package org.simakara.learning_management_system.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.simakara.learning_management_system.dto.request.CreateCourseRequest;
+import org.simakara.learning_management_system.dto.request.EnrollRequest;
 import org.simakara.learning_management_system.dto.request.UpdateCourseRequest;
 import org.simakara.learning_management_system.dto.response.CourseResponse;
+import org.simakara.learning_management_system.dto.response.EnrollResponse;
 import org.simakara.learning_management_system.dto.response.WebResponse;
 import org.simakara.learning_management_system.service.CourseService;
 import org.springframework.http.HttpStatus;
@@ -101,6 +103,48 @@ public class CourseController {
             @PathVariable(value = "code") String code
     ) {
         CourseResponse response = courseService.updateCourse(request, code);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        new WebResponse<>(
+                                response,
+                                HttpStatus.OK.value(),
+                                null,
+                                null
+                        )
+                );
+    }
+
+    @PostMapping(
+            path = "/enroll",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<WebResponse<EnrollResponse>> enrollStudent(
+            @RequestBody EnrollRequest request
+    ) {
+        EnrollResponse response = courseService.enrollStudentToCourse(request);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        new WebResponse<>(
+                                response,
+                                HttpStatus.OK.value(),
+                                null,
+                                null
+                        )
+                );
+    }
+
+    @PostMapping(
+            path = "/enroll/remove",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<WebResponse<EnrollResponse>> removeStudent(
+            @RequestBody EnrollRequest request
+    ) {
+        EnrollResponse response = courseService.removeStudentFromCourse(request);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(

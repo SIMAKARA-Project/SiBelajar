@@ -55,7 +55,7 @@ public class JwtService {
         var authorities = userDetails.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toSet());
+                .toList();
         return Jwts
                 .builder()
                 .setClaims(extraClaims)

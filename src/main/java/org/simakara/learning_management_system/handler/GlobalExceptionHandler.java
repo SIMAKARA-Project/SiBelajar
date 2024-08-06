@@ -127,6 +127,7 @@ public class GlobalExceptionHandler {
                 );
     }
 
+    @ExceptionHandler(Exception.class)
     public ResponseEntity<WebResponse<String>> handleException(
             Exception exception
     ) {

@@ -25,9 +25,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.security.Principal;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode(callSuper = true)
@@ -75,7 +73,10 @@ public class User extends CreatedAndUpdatedAt implements UserDetails, Principal 
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
     )
-    private Set<Role> roles = new HashSet<>();
+    private List<Role> roles;
+
+    @ManyToMany(mappedBy = "students")
+    private List<Course> courses = new ArrayList<>();
 
     @Override
     public String getName() {
@@ -84,10 +85,10 @@ public class User extends CreatedAndUpdatedAt implements UserDetails, Principal 
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.roles
+        return roles
                 .stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     @Override

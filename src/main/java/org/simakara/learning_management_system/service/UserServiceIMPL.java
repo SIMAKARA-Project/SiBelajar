@@ -6,6 +6,7 @@ import org.simakara.learning_management_system.dto.request.UpdateUserRequest;
 import org.simakara.learning_management_system.dto.response.UserResponse;
 import org.simakara.learning_management_system.handler.ValidatorHandler;
 import org.simakara.learning_management_system.model.User;
+import org.simakara.learning_management_system.repository.CourseRepository;
 import org.simakara.learning_management_system.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 import static org.simakara.learning_management_system.mapper.UserResponseMapper.toUserResponse;
+import static org.simakara.learning_management_system.tools.NameFormater.format;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +26,8 @@ import static org.simakara.learning_management_system.mapper.UserResponseMapper.
 public class UserServiceIMPL implements UserService{
 
     private final UserRepository userRepo;
+
+    private final CourseRepository courseRepo;
 
     private final ValidatorHandler validatorHandler;
 
@@ -83,13 +87,13 @@ public class UserServiceIMPL implements UserService{
         if (Objects.nonNull(firstname) && !firstname.isBlank()) {
             log.info("Setting new first name...");
 
-            user.setFirstname(firstname);
+            user.setFirstname(format(firstname));
         }
 
         if (Objects.nonNull(lastname) && !lastname.isBlank()) {
             log.info("Setting new last name...");
 
-            user.setLastname(lastname);
+            user.setLastname(format(lastname));
         }
 
         if (Objects.nonNull(email) && !email.isBlank()) {
@@ -127,6 +131,13 @@ public class UserServiceIMPL implements UserService{
                 );
 
         log.info("User found. Deleting user...");
+
+        user.getCourses().forEach(
+                course -> {
+                    course.getStudents().remove(user);
+                    courseRepo.save(course);
+                }
+        );
 
         userRepo.delete(user);
 

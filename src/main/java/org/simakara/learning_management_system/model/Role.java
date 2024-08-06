@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.simakara.learning_management_system.audit.CreatedAndUpdatedAt;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
@@ -36,5 +37,5 @@ public class Role extends CreatedAndUpdatedAt {
     private String name;
 
     @ManyToMany(mappedBy = "roles")
-    private Set<User> users = new HashSet<>();
+    private List<User> users;
 }
